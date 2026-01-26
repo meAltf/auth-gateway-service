@@ -3,6 +3,7 @@ package com.alataf.session.Service.impl;
 import com.alataf.session.DTO.LoginRequest;
 import com.alataf.session.Entity.User;
 import com.alataf.session.Entity.UserSession;
+import com.alataf.session.Exception.ConcurrentLoginException;
 import com.alataf.session.Repository.UserRepository;
 import com.alataf.session.Repository.UserSessionRepository;
 import jakarta.servlet.http.HttpSession;
@@ -30,10 +31,7 @@ public class AuthServiceImpl {
         }
 
         // Concurrent login check
-        sessionRepository.findByUserIdAndActiveTrue(user.getId())
-                .ifPresent(s -> {
-                    throw new RuntimeException("User already logged in on another device");
-                });
+        isConcurrentLogin(user);
 
         // Create session
         httpSession.setAttribute("USER_ID", user.getId());
@@ -46,6 +44,13 @@ public class AuthServiceImpl {
         userSession.setActive(true);
 
         sessionRepository.save(userSession);
+    }
+
+    private void isConcurrentLogin(User user) {
+        sessionRepository.findByUserIdAndActiveTrue(user.getId())
+                .ifPresent(s -> {
+                    throw new ConcurrentLoginException("Your session has expired due to multiple concurrent login");
+                });
     }
 
     public void logout(HttpSession session) {
