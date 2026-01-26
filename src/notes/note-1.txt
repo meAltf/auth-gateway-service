@@ -1,0 +1,10 @@
+Basic Security Config
+- Why Spring Security?
+   - Manages sessions
+   - Protects endpoints
+   - Gives us filters & hooks
+
+We will:
+  - Disable default login page
+  - Use our own REST login API
+  - Enable session management
