@@ -4,11 +4,11 @@ import com.alataf.session.DTO.LoginRequest;
 import com.alataf.session.Service.impl.AuthServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -23,13 +23,27 @@ public class AuthController {
             HttpSession session) {
 
         authService.login(request, session);
-        return ResponseEntity.ok("Login successful");
+        return ResponseEntity.ok(Map.of("message", "Login successful"));
     }
 
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpSession session) {
         authService.logout(session);
-        return ResponseEntity.ok("Logout successful");
+        return ResponseEntity.ok(Map.of("message", "Logout successful"));
     }
+
+    @GetMapping("/session")
+    public ResponseEntity<?> checkSession(HttpSession session) {
+
+        if (session == null || session.getAttribute("USER_ID") == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Session expired"));
+        }
+
+        return ResponseEntity.ok(
+                Map.of("message", "Session active")
+        );
+    }
+
 }
 
